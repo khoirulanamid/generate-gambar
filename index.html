@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ Whisk AI - Neural Genesis</title>
+    <meta name="description" content="Generate stunning AI images with automatic 4x upscaling using Whisk API">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Animated Background -->
+    <div class="bg-gradient"></div>
+    <div class="bg-grid"></div>
+
+    <!-- Main Container -->
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                        <path d="M2 17l10 5 10-5" />
+                        <path d="M2 12l10 5 10-5" />
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <h1>Whisk<span>AI</span></h1>
+                    <p>Image Generator Pro</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="status-indicator" id="statusIndicator">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Ready</span>
+                </div>
+                <button class="btn btn-icon" id="settingsBtn" title="Settings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3" />
+                        <path
+                            d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Settings Modal -->
+        <div class="modal-overlay" id="settingsModal">
+            <div class="modal glass-card">
+                <div class="modal-header">
+                    <h2>⚙️ Settings</h2>
+                    <button class="btn btn-icon btn-close" id="closeSettings">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="bearerToken">Bearer Token</label>
+                        <div class="input-wrapper">
+                            <input type="password" id="bearerToken" placeholder="Enter your Whisk API bearer token...">
+                            <button class="btn btn-icon btn-toggle-password" id="togglePassword">👁️</button>
+                        </div>
+                        <small>Your token is stored locally and never sent to third parties</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="concurrentLimit">Concurrent Jobs</label>
+                        <select id="concurrentLimit">
+                            <option value="1">1 (Sequential)</option>
+                            <option value="2" selected>2 (Recommended)</option>
+                            <option value="3">3 (Fast)</option>
+                        </select>
+                        <small>Number of images to generate simultaneously</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="autoUpscale" checked>
+                            <span class="checkbox-custom"></span>
+                            Enable Auto 4x Upscale
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" id="saveSettings">💾 Save Settings</button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Tab Bar Navigation -->
+        <nav class="tab-bar glass-card">
+            <button class="tab-item active" data-tab="generate">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                </svg>
+                <span>Generate</span>
+            </button>
+            <button class="tab-item" data-tab="gallery">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <polyline points="21 15 16 10 5 21" />
+                </svg>
+                <span>Gallery</span>
+            </button>
+            <button class="tab-item" data-tab="history">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                </svg>
+                <span>History</span>
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Tab Content: Generate -->
+            <div class="tab-content active" id="tab-generate">
+                <div class="generate-layout">
+                    <!-- Left Panel: Input Controls -->
+                    <div class="generate-left">
+                        <!-- Prompt Input Section -->
+                        <section class="prompt-section glass-card">
+                            <div class="section-header">
+                                <h2>📝 Prompt Input</h2>
+                                <div class="prompt-counter">
+                                    <span id="promptCount">0</span> prompts
+                                </div>
+                            </div>
+
+                            <div class="textarea-wrapper">
+                                <textarea id="promptInput"
+                                    placeholder="Enter your prompts here...&#10;&#10;One prompt per line for batch generation.&#10;&#10;Examples:&#10;• A majestic lion in the savanna, landscape, golden hour&#10;• Cyberpunk city at night, neon lights, portrait, futuristic&#10;• Cute cat wearing sunglasses, square, avatar style"
+                                    rows="8"></textarea>
+                                <div class="textarea-glow"></div>
+                            </div>
+
+                            <div class="prompt-actions">
+                                <label class="btn btn-secondary file-upload">
+                                    <input type="file" id="fileInput" accept=".txt" hidden>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                        <polyline points="17 8 12 3 7 8" />
+                                        <line x1="12" y1="3" x2="12" y2="15" />
+                                    </svg>
+                                    Upload .txt
+                                </label>
+
+                                <div class="aspect-selector">
+                                    <label>Aspect Ratio:</label>
+                                    <select id="aspectRatio">
+                                        <option value="auto">🔮 Auto-detect</option>
+                                        <option value="square">⬜ Square (1:1)</option>
+                                        <option value="landscape">🖼️ Landscape (16:9)</option>
+                                        <option value="portrait">📱 Portrait (9:16)</option>
+                                    </select>
+                                </div>
+
+                                <button class="btn btn-primary btn-generate" id="generateBtn">
+                                    <span class="btn-content">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                                        </svg>
+                                        <span id="generateText">Generate</span>
+                                    </span>
+                                    <div class="btn-loader"></div>
+                                </button>
+
+                                <button class="btn btn-danger" id="clearQueueBtn" style="display: none;">
+                                    🛑 Stop All
+                                </button>
+                            </div>
+                        </section>
+
+                        <!-- Progress Section -->
+                        <section class="progress-section glass-card" id="progressSection" style="display: none;">
+                            <div class="progress-header">
+                                <h3>📊 Generation Progress</h3>
+                                <span class="progress-stats">
+                                    <span id="completedCount">0</span> / <span id="totalCount">0</span> completed
+                                </span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" id="progressBar"></div>
+                            </div>
+                            <p class="progress-status" id="progressStatus">Initializing...</p>
+                        </section>
+                    </div>
+
+                    <!-- Right Panel: Gallery -->
+                    <div class="generate-right">
+                        <section class="gallery-section">
+                            <div class="gallery-header">
+                                <h2>🖼️ Generated Images</h2>
+                                <div class="gallery-actions">
+                                    <button class="btn btn-secondary" id="downloadAllBtn" style="display: none;">
+                                        ⬇️ Download All
+                                    </button>
+                                    <button class="btn btn-secondary" id="clearGalleryBtn" style="display: none;">
+                                        🗑️ Clear Gallery
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="gallery-grid" id="galleryGrid">
+                                <div class="gallery-empty" id="galleryEmpty">
+                                    <div class="empty-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                            <circle cx="8.5" cy="8.5" r="1.5" />
+                                            <polyline points="21 15 16 10 5 21" />
+                                        </svg>
+                                    </div>
+                                    <h3>No Images Yet</h3>
+                                    <p>Enter prompts and click Generate</p>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+                <!-- End Tab Content: Generate -->
+
+                <!-- Tab Content: Gallery -->
+                <div class="tab-content" id="tab-gallery">
+                    <section class="gallery-section">
+                        <div class="gallery-header">
+                            <h2>🖼️ Generated Images</h2>
+                            <div class="gallery-actions">
+                                <button class="btn btn-secondary" id="downloadAllBtn" style="display: none;">
+                                    ⬇️ Download All
+                                </button>
+                                <button class="btn btn-secondary" id="clearGalleryBtn" style="display: none;">
+                                    🗑️ Clear Gallery
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="gallery-grid" id="galleryGrid">
+                            <div class="gallery-empty" id="galleryEmpty">
+                                <div class="empty-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                        <circle cx="8.5" cy="8.5" r="1.5" />
+                                        <polyline points="21 15 16 10 5 21" />
+                                    </svg>
+                                </div>
+                                <h3>No Images Yet</h3>
+                                <p>Enter prompts above and click Generate to create stunning AI images</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                <!-- End Tab Content: Gallery -->
+
+                <!-- Tab Content: History -->
+                <div class="tab-content" id="tab-history">
+                    <section class="history-section glass-card">
+                        <div class="section-header">
+                            <h2>📜 Generation History</h2>
+                        </div>
+                        <div class="history-list" id="historyList">
+                            <div class="history-empty">
+                                <div class="empty-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <polyline points="12 6 12 12 16 14" />
+                                    </svg>
+                                </div>
+                                <h3>No History Yet</h3>
+                                <p>Your generation history will appear here</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                <!-- End Tab Content: History -->
+
+                <!-- Footer -->
+                <footer class="footer">
+                    <p>Built with 💜 by <strong>Informatika Student</strong> | Powered by Whisk AI & ImgUpscaler</p>
+                </footer>
+            </div>
+
+            <!-- Toast Container -->
+            <div class="toast-container" id="toastContainer"></div>
+
+            <script src="script.js"></script>
+</body>
+
+</html>
