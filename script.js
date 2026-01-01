@@ -57,6 +57,17 @@ class WhiskImageGenerator {
                 'photorealistic',
                 'cinematic'
             ],
+            // No text/watermark - prevent any text in image
+            noText: [
+                'no text',
+                'no letters',
+                'no words',
+                'no watermark',
+                'no signature',
+                'no writing',
+                'text-free',
+                'clean image'
+            ],
             // Negative prompt keywords (things to avoid)
             negative: [
                 'blurry',
@@ -261,9 +272,10 @@ class WhiskImageGenerator {
         const qualityTags = this.supportPrompt.quality.join(', ');
         const styleTags = this.supportPrompt.style.join(', ');
         const technicalTags = this.supportPrompt.technical.join(', ');
+        const noTextTags = this.supportPrompt.noText.join(', ');
 
-        // Combine original prompt with quality enhancers
-        const enhancedPrompt = `${originalPrompt}, ${qualityTags}, ${styleTags}, ${technicalTags}`;
+        // Combine original prompt with quality enhancers + no text
+        const enhancedPrompt = `${originalPrompt}, ${qualityTags}, ${styleTags}, ${technicalTags}, ${noTextTags}`;
 
         return enhancedPrompt;
     }
